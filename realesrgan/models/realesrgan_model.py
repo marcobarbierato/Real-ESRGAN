@@ -104,9 +104,11 @@ class RealESRGANModel(SRGANModel):
                     clip=True,
                     rounds=False)
             # JPEG compression
-            jpeg_p = out.new_zeros(out.size(0)).uniform_(*self.opt['jpeg_range'])
-            out = torch.clamp(out, 0, 1)  # clamp to [0, 1], otherwise JPEGer will result in unpleasant artifacts
-            out = self.jpeger(out, quality=jpeg_p)
+            if self.opt.get('jpeg_compress', True):
+                
+                jpeg_p = out.new_zeros(out.size(0)).uniform_(*self.opt['jpeg_range'])
+                out = torch.clamp(out, 0, 1)  # clamp to [0, 1], otherwise JPEGer will result in unpleasant artifacts
+                out = self.jpeger(out, quality=jpeg_p)
 
             # ----------------------- The second degradation process ----------------------- #
             # blur
@@ -143,15 +145,16 @@ class RealESRGANModel(SRGANModel):
             #   1. [resize back + sinc filter] + JPEG compression
             #   2. JPEG compression + [resize back + sinc filter]
             # Empirically, we find other combinations (sinc + JPEG + Resize) will introduce twisted lines.
-            if np.random.uniform() < 0.5:
+            if True:
                 # resize back + the final sinc filter
                 mode = random.choice(['area', 'bilinear', 'bicubic'])
                 out = F.interpolate(out, size=(ori_h // self.opt['scale'], ori_w // self.opt['scale']), mode=mode)
                 out = filter2D(out, self.sinc_kernel)
                 # JPEG compression
-                jpeg_p = out.new_zeros(out.size(0)).uniform_(*self.opt['jpeg_range2'])
-                out = torch.clamp(out, 0, 1)
-                out = self.jpeger(out, quality=jpeg_p)
+                if self.opt.get('jpeg_compress2', True):
+                    jpeg_p = out.new_zeros(out.size(0)).uniform_(*self.opt['jpeg_range2'])
+                    out = torch.clamp(out, 0, 1)
+                    out = self.jpeger(out, quality=jpeg_p)
             else:
                 # JPEG compression
                 jpeg_p = out.new_zeros(out.size(0)).uniform_(*self.opt['jpeg_range2'])
