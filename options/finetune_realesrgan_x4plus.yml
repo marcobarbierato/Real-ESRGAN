@@ -29,7 +29,7 @@ gaussian_noise_prob2: 0.5
 noise_range2: [1, 25]
 poisson_scale_range2: [0.05, 2.5]
 gray_noise_prob2: 0.4
-jpeg_compress: false
+jpeg_compress2: false
 jpeg_range2: [30, 95]
 
 gt_size: 256
