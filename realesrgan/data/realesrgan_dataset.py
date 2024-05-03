@@ -111,8 +111,6 @@ class RealESRGANDataset(data.Dataset):
         # TODO: 400 is hard-coded. You may change it accordingly
         h, w = img_gt.shape[0:2]
         crop_pad_size = self.opt.get('crop_pad_size', 400)
-        logger = get_root_logger()
-        logger.info(f'Using crop {crop_pad_size} and kernel range {self.kernel_range}')
         # pad
         if h < crop_pad_size or w < crop_pad_size:
             pad_h = max(0, crop_pad_size - h)
