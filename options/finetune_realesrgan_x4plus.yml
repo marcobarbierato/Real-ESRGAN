@@ -11,6 +11,8 @@ l1_gt_usm: True
 percep_gt_usm: True
 gan_gt_usm: False
 
+crop_pad_size: 450
+kernel_range: [7, 9, 11, 13, 15, 17]
 # the first degradation process
 resize_prob: [0.2, 0.7, 0.1]  # up, down, keep
 resize_range: [0.15, 1.5]
@@ -71,7 +73,7 @@ datasets:
     # data loader
     use_shuffle: true
     num_worker_per_gpu: 5
-    batch_size_per_gpu: 6
+    batch_size_per_gpu: 3
     dataset_enlarge_ratio: 1
     prefetch_mode: ~
 
