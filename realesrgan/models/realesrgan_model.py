@@ -112,7 +112,7 @@ class RealESRGANModel(SRGANModel):
 
             # ----------------------- The second degradation process ----------------------- #
             # blur
-            if np.random.uniform() > self.opt.get(['second_degrad_prob_skip'], 0):
+            if np.random.uniform() > self.opt.get('second_degrad_prob_skip', 0):
                 if np.random.uniform() < self.opt['second_blur_prob']:
                     out = filter2D(out, self.kernel2)
                 # random resize
