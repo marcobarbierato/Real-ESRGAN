@@ -21,6 +21,7 @@ gray_noise_prob: 0.4
 jpeg_compress: false
 jpeg_range: [30, 95]
 
+second_degrad_prob_skip: 0.1
 # the second degradation process
 second_blur_prob: 0.8
 resize_prob2: [0.3, 0.4, 0.3]  # up, down, keep
