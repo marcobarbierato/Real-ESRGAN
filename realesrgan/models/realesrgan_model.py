@@ -146,25 +146,28 @@ class RealESRGANModel(SRGANModel):
             #   1. [resize back + sinc filter] + JPEG compression
             #   2. JPEG compression + [resize back + sinc filter]
             # Empirically, we find other combinations (sinc + JPEG + Resize) will introduce twisted lines.
-            if True:
-                # resize back + the final sinc filter
-                mode = random.choice(['area', 'bilinear', 'bicubic'])
-                out = F.interpolate(out, size=(ori_h // self.opt['scale'], ori_w // self.opt['scale']), mode=mode)
+            #
+            # We only keep 1.
+            #if True:
+            # resize back + the final sinc filter
+            mode = random.choice(['area', 'bilinear', 'bicubic'])
+            out = F.interpolate(out, size=(ori_h // self.opt['scale'], ori_w // self.opt['scale']), mode=mode)
+            if np.random.uniform() < self.opt.get( 'sinc_prob', 1):
                 out = filter2D(out, self.sinc_kernel)
-                # JPEG compression
-                if self.opt.get('jpeg_compress2', True):
-                    jpeg_p = out.new_zeros(out.size(0)).uniform_(*self.opt['jpeg_range2'])
-                    out = torch.clamp(out, 0, 1)
-                    out = self.jpeger(out, quality=jpeg_p)
-            else:
-                # JPEG compression
+            # JPEG compression
+            if self.opt.get('jpeg_compress2', True):
                 jpeg_p = out.new_zeros(out.size(0)).uniform_(*self.opt['jpeg_range2'])
                 out = torch.clamp(out, 0, 1)
                 out = self.jpeger(out, quality=jpeg_p)
-                # resize back + the final sinc filter
-                mode = random.choice(['area', 'bilinear', 'bicubic'])
-                out = F.interpolate(out, size=(ori_h // self.opt['scale'], ori_w // self.opt['scale']), mode=mode)
-                out = filter2D(out, self.sinc_kernel)
+            #else:
+            #    # JPEG compression
+            #    jpeg_p = out.new_zeros(out.size(0)).uniform_(*self.opt['jpeg_range2'])
+            #    out = torch.clamp(out, 0, 1)
+            #    out = self.jpeger(out, quality=jpeg_p)
+            #    # resize back + the final sinc filter
+            #    mode = random.choice(['area', 'bilinear', 'bicubic'])
+            #    out = F.interpolate(out, size=(ori_h // self.opt['scale'], ori_w // self.opt['scale']), mode=mode)
+            #    out = filter2D(out, self.sinc_kernel)
 
             # clamp and round
             self.lq = torch.clamp((out * 255.0).round(), 0, 255) / 255.
