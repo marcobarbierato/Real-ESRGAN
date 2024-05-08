@@ -236,6 +236,8 @@ class RealESRGANModel(SRGANModel):
             l_g_gan = self.cri_gan(fake_g_pred, True, is_disc=False)
             l_g_total += l_g_gan
             loss_dict['l_g_gan'] = l_g_gan
+            self.loss_g_sum += l_g_total
+            loss_dict['l_gan_total'] = l_g_total
 
             l_g_total.backward()
             self.optimizer_g.step()
@@ -256,10 +258,20 @@ class RealESRGANModel(SRGANModel):
         l_d_fake = self.cri_gan(fake_d_pred, False, is_disc=True)
         loss_dict['l_d_fake'] = l_d_fake
         loss_dict['out_d_fake'] = torch.mean(fake_d_pred.detach())
+        loss_dict['l_d_total'] = (l_d_real + l_d_fake) / 2
+        self.loss_d_sum += (l_d_real + l_d_fake) / 2
         l_d_fake.backward()
         self.optimizer_d.step()
 
         if self.ema_decay > 0:
             self.model_ema(decay=self.ema_decay)
 
+        # average loss
+        print_freq = self.opt['logger']['print_freq']
+        if current_iter % print_freq == 0:
+            loss_dict['l_g_tot_mean'] = self.loss_g_sum / print_freq
+            self.loss_g_sum = 0
+            loss_dict['l_d_tot_mean'] = self.loss_d_sum / print_freq
+            self.loss_d_sum = 0
+        
         self.log_dict = self.reduce_loss_dict(loss_dict)
